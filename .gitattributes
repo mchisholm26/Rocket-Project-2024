@@ -1,0 +1,5 @@
+# Set default behavior to text
+* text=auto
+
+# Ignore binary files
+*.mpy binary
