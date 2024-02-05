@@ -15,4 +15,4 @@
 #objectives - variables required to achieve
 # 1) Detect Lauch- acceleration and altitude 
 # 2) Alter Sampling rate - 
-# 3) 
+# 3) Write all data to SD card when landed
