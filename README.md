@@ -6,7 +6,7 @@
 * [SparkFun Triple Axis Accelerometer Breakout - KX134 (Qwiic)](https://www.sparkfun.com/products/17589)
 * [MPL3115A2 - I2C Barometric Pressure/Altitude/Temperature Sensor](https://www.adafruit.com/product/1893)
 
-#Objectives: 1) detect lauch 2) Alter Sampling Rate upon descend 3) write all data to SD card for later calculation
+#Objectives: PROVE SUPERSONIC 1) detect lauch 2) Alter Sampling Rate upon descend 3) write all data to SD card for later calculation
 
 #Teensy reads data from accelerometer and barometer, writes to SD Card
 #desired data from barometer: altitude
@@ -14,5 +14,5 @@
 
 #objectives - variables required to achieve
 # 1) Detect Lauch- acceleration and altitude 
-# 2) Alter Sampling rate - 
-# 3) Write all data to SD card when landed
+# 2) Alter Sampling rate - detect descend when acceleration value=0 and/or altitude begins decreasing
+# 3) Write all data to SD card when landed - when landed or right before in case of damage? either way use 
