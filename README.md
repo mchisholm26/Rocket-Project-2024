@@ -11,3 +11,8 @@
 #Teensy reads data from accelerometer and barometer, writes to SD Card
 #desired data from barometer: altitude
 #desired data from accelerometer: acceleration (all 3 axes)
+
+#objectives - variables required to achieve
+# 1) Detect Lauch- acceleration and altitude 
+# 2) Alter Sampling rate - 
+# 3) 
