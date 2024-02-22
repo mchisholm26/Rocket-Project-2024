@@ -8,6 +8,13 @@ Adafruit_MPL3115A2 mpl;
 
 outputData accelData;
 
+void writeSD()
+{
+    file = SD.open("datalog.txt", FILE_WRITE);
+
+    file.println("hello, world!");
+}
+
 void setup()
 {
     Wire.begin();
@@ -31,6 +38,15 @@ void setup()
         while (1)
             ;
     }
+
+    if (!SD.begin(BUILTIN_SDCARD))
+    {
+        Serial.println("Card failed, or not present");
+        while (1)
+            ;
+    }
+
+    writeSD();
 
     delay(5);
 

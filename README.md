@@ -7,13 +7,15 @@ The purpose of this code is to control the rocket being launched by Engineering 
 * [Teensy® 4.1](https://www.pjrc.com/store/teensy41.html)
 * [SparkFun Triple Axis Accelerometer Breakout - KX134 (Qwiic)](https://www.sparkfun.com/products/17589)
 * [MPL3115A2 - I2C Barometric Pressure/Altitude/Temperature Sensor](https://www.adafruit.com/product/1893)
+* Unnamed GPS Module
+* Unnamed Gyroscope (from Peter??)
 
 ## Software (on Rocket)
 ~~* [CircutPython](https://circuitpython.org/board/teensy41/)~~
 * C++
 
 ## Software (on Ground)
-* TBD
+* Probably Python (it's not like we really need to be efficient, since we're using an actual computer)
 
 ## Objectives:
 
