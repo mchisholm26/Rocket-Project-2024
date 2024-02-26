@@ -17,6 +17,9 @@ The purpose of this code is to control the rocket being launched by Engineering 
 ## Software (on Ground)
 * Probably Python (it's not like we really need to be efficient, since we're using an actual computer)
 
+## Peter's Cool Google Drive Folder
+[Peter's Cool Google Drive Folder](https://drive.google.com/drive/folders/1-p52N1nL5X8tHSIu3wcmdoqP79AqWREl)
+
 ## Objectives:
 
 PROVE SUPERSONIC
