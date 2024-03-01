@@ -68,6 +68,7 @@ void writeDataPoint()
     // TODO: add BNO055 data
     file.println();
     file.close();
+    logTimer.start(); // reset the timer!
 }
 
 void setup()
