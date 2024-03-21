@@ -1,9 +1,9 @@
 # layout
 
-altimeter and orientation connected via i2c
-bno and radio via spi
+altimeter and bno connected via i2c
+orientation and radio via spi
 
-bno on chip select 0
+orientation on chip select 0
 radio on chip select 1
 
 # base station
