@@ -13,3 +13,6 @@ also had 2 leds currently (0, 1)
 (green led on 1, white on 0)
 
 this should talk to the rocket!
+
+# Schematic
+![Schematic image](egr_rocket_test_board_v1.jpg)
