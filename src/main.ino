@@ -1,11 +1,19 @@
 #include <SD.h>
 #include <Wire.h>
 #include <Timer.h>
+#include <RH_RF95.h>
 #include <SparkFun_KX13X.h>
 #include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_MPL3115A2.h>
 
+#define RADIO_FREQ 915.0
+
+#define RFM95_CS 10
+#define RFM95_RST 9
+#define RFM95_INT 2
+
+RH_RF95 rf95(RFM95_CS, RFM95_INT);
 SparkFun_KX134 kxAccel;
 Adafruit_MPL3115A2 mpl;
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
@@ -20,18 +28,20 @@ struct mplData
 
 outputData accelData;
 mplData baroData;
-file File;
-
-Timer logTimer();
-Timer accelTimer();
-Timer baroTimer();
-Timer bnoTimer();
 
 void writeHeaders()
 {
     if (SD.exists("datalog.csv"))
     {
         SD.remove("datalog.csv"); // remove the file if it exists
+
+File file;
+
+Timer logTimer;
+Timer accelTimer;
+Timer baroTimer;
+Timer bnoTimer;
+
     }
     file = SD.open("datalog.csv", FILE_WRITE);
 
@@ -50,11 +60,11 @@ void writeDataPoint()
     file.print(",");
     file.print(accelTimer.read());
     file.print(",");
-    file.print(accelData.x);
+    file.print(accelData.xData);
     file.print(",");
-    file.print(accelData.y);
+    file.print(accelData.yData);
     file.print(",");
-    file.print(accelData.z);
+    file.print(accelData.zData);
     file.print(",");
     file.print(baroTimer.read());
     file.print(",");
@@ -78,12 +88,29 @@ void setup()
     Serial.begin(115200);
     Serial.println("welcome, i guess");
 
-    while (!Serial)
-        delay(50); // Wait for Serial Monitor to open
+    delay(50);  // Wait for Serial Monitor to recognize us if we're connected directly...
     // make sure we have access to all of our sensors / sd card before starting...
 
     if (!kxAccel.begin())
     {
+    if (!rf95.init()) {
+        Serial.println("Could not communicate with the radio! Going to just... stop.");
+        while (1)
+            ;
+    }
+
+    // do radio setup first, so if we have any issues later we can scream those problems
+
+    if (!rf95.setFrequency(RADIO_FREQ)) {
+        Serial.println("Could not communicate with the radio! Going to just... stop.");
+        while (1)
+            ;
+    }
+
+    rf95.setTxPower(23, false);
+
+    // TODO: scream errors over radio
+
         Serial.println("Could not communicate with the KX13X! Going to just... stop.");
         while (1)
             ;
