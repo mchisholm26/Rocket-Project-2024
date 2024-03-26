@@ -29,12 +29,6 @@ struct mplData
 outputData accelData;
 mplData baroData;
 
-void writeHeaders()
-{
-    if (SD.exists("datalog.csv"))
-    {
-        SD.remove("datalog.csv"); // remove the file if it exists
-
 File file;
 
 Timer logTimer;
@@ -42,6 +36,11 @@ Timer accelTimer;
 Timer baroTimer;
 Timer bnoTimer;
 
+void writeHeaders()
+{
+    if (SD.exists("datalog.csv"))
+    {
+        SD.remove("datalog.csv"); // remove the file if it exists
     }
     file = SD.open("datalog.csv", FILE_WRITE);
 
