@@ -9,9 +9,9 @@
 
 #define RADIO_FREQ 915.0
 
-#define RFM95_CS 10
-#define RFM95_RST 9
-#define RFM95_INT 2
+#define RFM95_CS 3
+#define RFM95_RST 11
+#define RFM95_INT 4
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 SparkFun_KX134 kxAccel;
@@ -108,9 +108,8 @@ void setup()
 
     rf95.setTxPower(23, false);
 
-    // TODO: scream errors over radio
-
-        Serial.println("Could not communicate with the KX13X! Going to just... stop.");
+        Serial.println("Could not communicate with the KX134! Going to just... stop.");
+        rf95.send("error: initializing KX134", 23);
         while (1)
             ;
     }
@@ -118,6 +117,7 @@ void setup()
     if (!mpl.begin())
     {
         Serial.println("Could not communicate with the MPL3115A2! Going to just... stop.");
+        rf95.send("error: initializing MPL3115A2", 23);
         while (1)
             ;
     }
@@ -125,6 +125,7 @@ void setup()
     if (!bno.begin())
     {
     	Serial.println("Could not communicate with the BNO055! Going to just... stop");
+        rf95.send("error: initializing BNO055", 23);
     	while (1)
     		;
     }
@@ -132,6 +133,7 @@ void setup()
     if (!SD.begin(BUILTIN_SDCARD))
     {
         Serial.println("Card failed, or not present");
+        rf95.send("error: initializing SD card", 23);
         while (1)
             ;
     }
