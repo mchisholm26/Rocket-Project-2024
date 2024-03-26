@@ -26,8 +26,20 @@ struct mplData
     float temperature;
 };
 
+//struct for bno data
+struct bnoData
+{
+    imu::Vector<3> linear_acceleration; //m/s^2
+    imu::Quaternion orientation_quat; //quaternion
+    imu::Vector<3> angular_velocity; //rps
+    uint8_t sys_health;
+    uint8_t gyro_health;
+    uint8_t accel_health;
+}
+
 outputData accelData;
 mplData baroData;
+bnoData imuData;
 
 File file;
 
@@ -44,12 +56,19 @@ void writeHeaders()
     }
     file = SD.open("datalog.csv", FILE_WRITE);
 
-    file.println("DeltaTime,AccelAge,AccelX,AccelY,AccelZ,BaroAge,Pressure,Altitude,Temperature");
+    file.println("DeltaTime,AccelAge,AccelX,AccelY,AccelZ,BaroAge,Pressure,Altitude,Temperature,BnoAge,BnoAccelX,BnoAccelY,BnoAccelZ,BnoOrientationW,BnoOrientationX,BnoOrientationY,BnoOrientationZ,BnoAngularX,BnoAngularY,BnoAngularZ,BnoSysHealth,BnoGyroHealth,BnoAccelHealth");
     file.close();
     // DeltaTime is the time between the last data point and the current one.
     // AccelX, AccelY, AccelZ are the accelerometer data.
     // Pressure, Altitude, Temperature are the barometer data.
     // AccelAge and BaroAge are the time since the last data point for each sensor.
+    // BnoAge is the time between the last data point and the current 
+    // BnoAccelX, Y, Z are linear accelerations in m/s recorded by Bno
+    // BnoOrientationW, X, Y, Z is absolute orientation expressed as quaternion
+    // BnoAngular X, Y, Z is angular velocity expressed as an euler angle in radians per second
+    // BnoSysHealth is calibration of total system (0 is bad, 3 is good)
+    // BnoGyroHealth is calibration of gyro (0 is bad, 3 is good)
+    // BnoAccelHealth is calibration of accelerometer (0 is bad, 3 is good)
 }
 
 void writeDataPoint()
@@ -75,6 +94,32 @@ void writeDataPoint()
     file.print(",");
     file.print(bnoTimer.read());
     // TODO: add BNO055 data
+    file.print(",");
+    file.print(imuData.linear_acceleration.x());
+    file.print(",");
+    file.print(imuData.linear_acceleration.y());
+    file.print(",");
+    file.print(imuData.linear_acceleration.z());
+    file.print(",");
+    file.print(imuData.orientation_quat.w());
+    file.print(",");
+    file.print(imuData.orientation_quat.x());
+    file.print(",");
+    file.print(imuData.orientation_quat.y());
+    file.print(",");
+    file.print(imuData.orientation_quat.z());
+    file.print(",");
+    file.print(imuData.angular_velocity.x());
+    file.print(",");
+    file.print(imuData.angular_velocity.y());
+    file.print(",");
+    file.print(imuData.angular_velocity.z());
+    file.print(",");
+    file.print(imuData.sys_health);
+    file.print(",");
+    file.print(imuData.gyro_health);
+    file.print(",");
+    file.print(imuData.accel_health);
     file.println();
     file.close();
     logTimer.start(); // reset the timer!
@@ -181,5 +226,18 @@ void loop()
         baroData.temperature = mpl.getLastConversionResults(MPL3115A2_TEMPERATURE);
         mpl.startOneShot(); // get latest data
     }
+
+    //BNO055 IMU logic
+    if (1) {
+        bnoTimer.start();
+        imuData.linear_acceleration = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+        imuData.orientation_quat = bno.getQuat();
+        imuData.angular_velocity = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+        uint8_t mag = 0;
+        bno.getCalibration(&imuData.sys_health, &imuData.gyro_health, &imuData.accel_health, &mag);
+        
+    }
+
+    
     writeDataPoint();
 }
