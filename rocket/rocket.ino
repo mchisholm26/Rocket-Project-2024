@@ -9,14 +9,21 @@
 
 #define RADIO_FREQ 915.0
 
-#define RFM95_CS 3
-#define RFM95_RST 11
-#define RFM95_INT 4
+#define RFM95_CS 1
+#define RFM95_RST 9
+#define RFM95_INT 2
+
+#define KX134_CS 0
+
+#define led_red 28     // there are red and green indicator leds on digital pins 28 and 29
+#define led_green 29 
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
-SparkFun_KX134 kxAccel;
+SparkFun_KX134_SPI kxAccel;
 Adafruit_MPL3115A2 mpl;
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
+
+
 
 // struct for mpl data
 struct mplData
@@ -35,7 +42,7 @@ struct bnoData
     uint8_t sys_health;
     uint8_t gyro_health;
     uint8_t accel_health;
-}
+};
 
 outputData accelData;
 mplData baroData;
@@ -132,10 +139,18 @@ void setup()
     Serial.begin(115200);
     Serial.println("welcome, i guess");
 
+    pinMode(led_red, OUTPUT);
+    pinMode(led_green, OUTPUT);
+    digitalWrite(led_red, 0);
+    digitalWrite(led_green, 1);
+
     delay(50);  // Wait for Serial Monitor to recognize us if we're connected directly...
     // make sure we have access to all of our sensors / sd card before starting...
 
-    if (!kxAccel.begin())
+    pinMode(KX134_CS, OUTPUT);    //this gets the kx134 cs pin ready, not sure why it's needed, maybe because it's an active low input?
+    digitalWrite(KX134_CS, 1);
+    
+    if (!kxAccel.begin(KX134_CS))
     {
     if (!rf95.init()) {
         Serial.println("Could not communicate with the radio! Going to just... stop.");
@@ -183,6 +198,8 @@ void setup()
             ;
     }
 
+    Serial.println("Everything initialized successfully!");
+    
     baroData.pressure = 0;
     baroData.altitude = 0;
     baroData.temperature = 0;
@@ -193,7 +210,7 @@ void setup()
 
     kxAccel.enableAccel(false);
 
-    kxAccel.setRange(SFE_KX134_RANGE16G); // 16g
+    kxAccel.setRange(SFE_KX134_RANGE64G); // 64g crank it up all the way, expecting ~40g on the flight
 
     kxAccel.enableDataEngine(); // Enables the bit that indicates data is ready.
     // kxAccel.setOutputDataRate(); // Default is 50Hz
