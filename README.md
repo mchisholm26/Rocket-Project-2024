@@ -9,7 +9,7 @@ The purpose of this code is to control the rocket being launched by Engineering 
 * [MPL3115A2 - I2C Barometric Pressure/Altitude/Temperature Sensor](https://www.adafruit.com/product/1893)
 * [Adafruit 9-DOF Absolute Orientation IMU Fusion Breakout - BNO055](https://www.adafruit.com/product/2472)
 * [Adafruit RFM95W LoRa Radio Transceiver Breakout - 868 or 915 MHz - RadioFruit](https://www.adafruit.com/product/3072)
-* [Flash Memory Datasheet](https://www.renesas.com/us/en/document/dst/at25sf081b-datasheet) [Example code for the flash] (https://rheingoldheavy.com/at25sf081-tutorial-02-reading-memory-byte/)
+* [Flash Memory Datasheet](https://www.renesas.com/us/en/document/dst/at25sf081b-datasheet) [Example code for the flash](https://rheingoldheavy.com/at25sf081-tutorial-02-reading-memory-byte/)
 * Unnamed GPS Module
 
 ## Software (on Rocket)
