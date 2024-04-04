@@ -23,6 +23,7 @@ SparkFun_KX134_SPI kxAccel;
 Adafruit_MPL3115A2 mpl;
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
+long elapsedTime; // running count of milliseconds for log entries
 
 
 // struct for mpl data
@@ -63,7 +64,7 @@ void writeHeaders()
     }
     file = SD.open("datalog.csv", FILE_WRITE);
 
-    file.println("DeltaTime,AccelAge,AccelX,AccelY,AccelZ,BaroAge,Pressure,Altitude,Temperature,BnoAge,BnoAccelX,BnoAccelY,BnoAccelZ,BnoOrientationW,BnoOrientationX,BnoOrientationY,BnoOrientationZ,BnoAngularX,BnoAngularY,BnoAngularZ,BnoSysHealth,BnoGyroHealth,BnoAccelHealth");
+    file.println("TotalTime,DeltaTime,AccelAge,AccelX,AccelY,AccelZ,BaroAge,Pressure,Altitude,Temperature,BnoAge,BnoAccelX,BnoAccelY,BnoAccelZ,BnoOrientationW,BnoOrientationX,BnoOrientationY,BnoOrientationZ,BnoAngularX,BnoAngularY,BnoAngularZ,BnoSysHealth,BnoGyroHealth,BnoAccelHealth");
     file.close();
     // DeltaTime is the time between the last data point and the current one.
     // AccelX, AccelY, AccelZ are the accelerometer data.
@@ -81,6 +82,9 @@ void writeHeaders()
 void writeDataPoint()
 {
     file = SD.open("datalog.csv", FILE_WRITE);
+    elapsedTime += logTimer.read();
+    file.print(elapsedTime);
+    file.print(",");
     file.print(logTimer.read());
     file.print(",");
     file.print(accelTimer.read());
@@ -149,27 +153,39 @@ void setup()
 
     pinMode(KX134_CS, OUTPUT);    //this gets the kx134 cs pin ready, not sure why it's needed, maybe because it's an active low input?
     digitalWrite(KX134_CS, 1);
+    pinMode(RFM95_RST, OUTPUT);   //set the radio reset pin high so the radio is ready to go
+    digitalWrite(RFM95_RST, 1);
     
-    if (!kxAccel.begin(KX134_CS))
+  //reset the radio
+  digitalWrite(RFM95_RST, LOW);
+  delay(10);
+  digitalWrite(RFM95_RST, HIGH);
+  delay(10);
+  
+  // do radio setup first, so if we have any issues later we can scream those problems
+  if (!rf95.init()) {
+      Serial.println("Could not communicate with the radio! Going to just... stop.");
+      digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
+      while (1)
+          ;
+  }
+
+  //now try to talk to the radio
+  if (!rf95.setFrequency(RADIO_FREQ)) {
+      Serial.println("Could not communicate with the radio! Going to just... stop.");
+      digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
+      while (1)
+          ;
+  }
+
+  rf95.setTxPower(23, false);
+
+  //send a test message over the radio
+  rf95.send("Hello, rocket here", 23);
+  //delay(10);  //give the receiver a bit to catch up - I'm not sure this is necessary I'm having trouble with the receiver buffer
+  
+  if (!kxAccel.begin(KX134_CS))
     {
-    if (!rf95.init()) {
-        Serial.println("Could not communicate with the radio! Going to just... stop.");
-        digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
-        while (1)
-            ;
-    }
-
-    // do radio setup first, so if we have any issues later we can scream those problems
-
-    if (!rf95.setFrequency(RADIO_FREQ)) {
-        Serial.println("Could not communicate with the radio! Going to just... stop.");
-        digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
-        while (1)
-            ;
-    }
-
-    rf95.setTxPower(23, false);
-
         Serial.println("Could not communicate with the KX134! Going to just... stop.");
         rf95.send("error: initializing KX134", 23);
         digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
@@ -189,8 +205,8 @@ void setup()
     if (!bno.begin())
     {
     	Serial.println("Could not communicate with the BNO055! Going to just... stop");
-        rf95.send("error: initializing BNO055", 23);
-        digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
+      rf95.send("error: initializing BNO055", 26);
+      digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
     	while (1)
     		;
     }
@@ -204,7 +220,9 @@ void setup()
             ;
     }
 
+    // everything works, send it over serial and radio
     Serial.println("Everything initialized successfully!");
+    rf95.send("checks complete, ready to go!", 28);
     digitalWrite(led_red, 1);   // turn off red led to show that everything is working
 
     
@@ -229,6 +247,7 @@ void setup()
 
     bno.setExtCrystalUse(true);
 
+    elapsedTime = 0;
     logTimer.start();
     accelTimer.start();
     baroTimer.start();
