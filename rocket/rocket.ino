@@ -141,8 +141,8 @@ void setup()
 
     pinMode(led_red, OUTPUT);
     pinMode(led_green, OUTPUT);
-    digitalWrite(led_red, 0);
-    digitalWrite(led_green, 1);
+    digitalWrite(led_red, 0);   // turn on both leds to show the board is starting up
+    digitalWrite(led_green, 0);
 
     delay(50);  // Wait for Serial Monitor to recognize us if we're connected directly...
     // make sure we have access to all of our sensors / sd card before starting...
@@ -154,6 +154,7 @@ void setup()
     {
     if (!rf95.init()) {
         Serial.println("Could not communicate with the radio! Going to just... stop.");
+        digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;
     }
@@ -162,6 +163,7 @@ void setup()
 
     if (!rf95.setFrequency(RADIO_FREQ)) {
         Serial.println("Could not communicate with the radio! Going to just... stop.");
+        digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;
     }
@@ -170,6 +172,7 @@ void setup()
 
         Serial.println("Could not communicate with the KX134! Going to just... stop.");
         rf95.send("error: initializing KX134", 23);
+        digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;
     }
@@ -178,6 +181,7 @@ void setup()
     {
         Serial.println("Could not communicate with the MPL3115A2! Going to just... stop.");
         rf95.send("error: initializing MPL3115A2", 23);
+        digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;
     }
@@ -186,6 +190,7 @@ void setup()
     {
     	Serial.println("Could not communicate with the BNO055! Going to just... stop");
         rf95.send("error: initializing BNO055", 23);
+        digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
     	while (1)
     		;
     }
@@ -194,11 +199,14 @@ void setup()
     {
         Serial.println("Card failed, or not present");
         rf95.send("error: initializing SD card", 23);
+        digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;
     }
 
     Serial.println("Everything initialized successfully!");
+    digitalWrite(led_red, 1);   // turn off red led to show that everything is working
+
     
     baroData.pressure = 0;
     baroData.altitude = 0;
