@@ -52,6 +52,7 @@ void loop()
 {
     // read incoming messages from rocket
     char buf[RH_RF95_MAX_MESSAGE_LEN];
+    memset(buf, 0, sizeof(buf));
     uint8_t len = sizeof(buf);
     if (rf95.recv(buf, &len))
     {

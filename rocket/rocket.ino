@@ -88,6 +88,8 @@ void writeDataPoint()
     char buf[RH_RF95_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
 
+    memset(buf, 0, len); // clear the buffer
+
     snprintf(buf, len, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
              elapsedTime, // TotalTime
              logTimer.read(), // DeltaTime
