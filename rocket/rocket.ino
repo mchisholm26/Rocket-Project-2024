@@ -90,7 +90,7 @@ void writeDataPoint()
 
     memset(buf, 0, len); // clear the buffer
 
-    snprintf(buf, len, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+    snprintf(buf, len, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
              elapsedTime, // TotalTime
              logTimer.read(), // DeltaTime
              accelTimer.read(), // AccelAge

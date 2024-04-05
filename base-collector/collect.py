@@ -35,7 +35,7 @@ class ConsoleUI:
         self.__data_csv = open("data.csv", "w")
         self.__logfile = open("log.txt", "w")
         # rocket.ino, line 47
-        self.__data_csv.write("DeltaTime,AccelAge,AccelX,AccelY,AccelZ,BaroAge,Altitude,Pressure,Temperature,BnoAge,BnoAccelX,BnoAccelY,BnoAccelZ,BnoOrientationW,BnoOrientationX,BnoOrientationY,BnoOrientationZ,BnoAngularX,BnoAngularY,BnoAngularZ,BnoSysHealth,BnoGyroHealth,BnoAccelHealth\n")
+        self.__data_csv.write("TotalTime,DeltaTime,AccelAge,AccelX,AccelY,AccelZ,BaroAge,Altitude,Pressure,Temperature,BnoAge,BnoAccelX,BnoAccelY,BnoAccelZ,BnoOrientationW,BnoOrientationX,BnoOrientationY,BnoOrientationZ,BnoAngularX,BnoAngularY,BnoAngularZ,BnoSysHealth,BnoGyroHealth,BnoAccelHealth\n")
         self.messages = 0
         self.status = {
             "base": 0,
@@ -43,8 +43,11 @@ class ConsoleUI:
             # 0 = unknown (purple), 1 = okay (green), 2 = error (red)
         }
         self.stats = {
+            "time_connected": -1,
+            "time_since_last_data_update": -1,
             "temperature": 0,
             "altitude": 0,
+            "bno_sys_health": 0,
             "rssi": 0
         }
 
@@ -57,12 +60,15 @@ class ConsoleUI:
         self.__status_panel = Panel(status_table, title="Status", border_style="green")
 
         stats_table = Table(title="", show_header=False, show_edge=False, expand=True)
-        stats_table.add_column("Stat")
+        stats_table.add_column("Stat", width=20)
         stats_table.add_column("Value")
         stats_table.add_row("Temperature", f"{self.stats['temperature']} °C")
         stats_table.add_row("Temperature (American)", f"{self.stats['temperature'] * 9/5 + 32} °F")
+        stats_table.add_row("Time Connected", f"{round(self.stats['time_connected'], 2)} s")
         stats_table.add_row("Altitude", f"{self.stats['altitude']} m")
+        stats_table.add_row("Time Since Last Data Update", f"{self.stats['time_since_last_data_update']} s")
         stats_table.add_row("RSSI", f"{self.stats['rssi']} dBm")
+        stats_table.add_row("BNO Sys Health", f"{self.stats['bno_sys_health']}")
         stats_table.add_row("Messages", f"{self.messages}")
         self.__stats_panel = Panel(stats_table, title="Stats", border_style="blue")
         
@@ -96,8 +102,13 @@ class ConsoleUI:
             elif message.startswith("message"):
                 _, type, contents = message.split(": ")
                 if type.startswith("d:"):
-                    self.stats["temperature"] = contents
                     self.__data_csv.write(contents + "\n")
+                    data = contents.split(",")
+                    self.stats["time_connected"] = float(data[0])
+                    self.stats["time_since_last_data_update"] = float(data[1])
+                    self.stats["temperature"] = float(data[9])
+                    self.stats["altitude"] = float(data[7])
+                    self.stats["bno_sys_health"] = float(data[21])
                 elif type.startswith("ok"):
                     self.status["rocket"] = 1
                 elif type.startswith("error"):
