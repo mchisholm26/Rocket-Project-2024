@@ -63,8 +63,7 @@ void writeHeaders()
         SD.remove("datalog.csv"); // remove the file if it exists
     }
     file = SD.open("datalog.csv", FILE_WRITE);
-
-    file.println("TotalTime,DeltaTime,AccelAge,AccelX,AccelY,AccelZ,BaroAge,Pressure,Altitude,Temperature,BnoAge,BnoAccelX,BnoAccelY,BnoAccelZ,BnoOrientationW,BnoOrientationX,BnoOrientationY,BnoOrientationZ,BnoAngularX,BnoAngularY,BnoAngularZ,BnoSysHealth,BnoGyroHealth,BnoAccelHealth");
+    file.println("TotalTime,DeltaTime,AccelAge,AccelX,AccelY,AccelZ,BaroAge,Altitude,Pressure,Temperature,BnoAge,BnoAccelX,BnoAccelY,BnoAccelZ,BnoOrientationW,BnoOrientationX,BnoOrientationY,BnoOrientationZ,BnoAngularX,BnoAngularY,BnoAngularZ,BnoSysHealth,BnoGyroHealth,BnoAccelHealth");
     file.close();
     // DeltaTime is the time between the last data point and the current one.
     // AccelX, AccelY, AccelZ are the accelerometer data.
@@ -82,58 +81,45 @@ void writeHeaders()
 void writeDataPoint()
 {
     file = SD.open("datalog.csv", FILE_WRITE);
+    // write the data to the buf, then send it over radio & write to SD
+
     elapsedTime += logTimer.read();
-    file.print(elapsedTime);
-    file.print(",");
-    file.print(logTimer.read());
-    file.print(",");
-    file.print(accelTimer.read());
-    file.print(",");
-    file.print(accelData.xData);
-    file.print(",");
-    file.print(accelData.yData);
-    file.print(",");
-    file.print(accelData.zData);
-    file.print(",");
-    file.print(baroTimer.read());
-    file.print(",");
-    file.print(baroData.altitude);
-    file.print(",");
-    file.print(baroData.pressure);
-    file.print(",");
-    file.print(baroData.temperature);
-    file.print(",");
-    file.print(bnoTimer.read());
-    // TODO: add BNO055 data
-    file.print(",");
-    file.print(imuData.linear_acceleration.x());
-    file.print(",");
-    file.print(imuData.linear_acceleration.y());
-    file.print(",");
-    file.print(imuData.linear_acceleration.z());
-    file.print(",");
-    file.print(imuData.orientation_quat.w());
-    file.print(",");
-    file.print(imuData.orientation_quat.x());
-    file.print(",");
-    file.print(imuData.orientation_quat.y());
-    file.print(",");
-    file.print(imuData.orientation_quat.z());
-    file.print(",");
-    file.print(imuData.angular_velocity.x());
-    file.print(",");
-    file.print(imuData.angular_velocity.y());
-    file.print(",");
-    file.print(imuData.angular_velocity.z());
-    file.print(",");
-    file.print(imuData.sys_health);
-    file.print(",");
-    file.print(imuData.gyro_health);
-    file.print(",");
-    file.print(imuData.accel_health);
-    file.println();
-    file.close();
+    
+    char buf[RH_RF95_MAX_MESSAGE_LEN];
+    uint8_t len = sizeof(buf);
+
+    snprintf(buf, len, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+             elapsedTime, // TotalTime
+             logTimer.read(), // DeltaTime
+             accelTimer.read(), // AccelAge
+             accelData.xData, // AccelX
+             accelData.yData, // AccelY
+             accelData.zData, // AccelZ
+             baroTimer.read(), // BaroAge
+             baroData.altitude, // Altitude
+             baroData.pressure, // Pressure
+             baroData.temperature, // Temperature
+             bnoTimer.read(), // BnoAge
+             imuData.linear_acceleration.x(), // BnoAccelX
+             imuData.linear_acceleration.y(), // BnoAccelY
+             imuData.linear_acceleration.z(), // BnoAccelZ
+             imuData.orientation_quat.w(), // BnoOrientationW
+             imuData.orientation_quat.x(), // BnoOrientationX
+             imuData.orientation_quat.y(), // BnoOrientationY
+             imuData.orientation_quat.z(), // BnoOrientationZ
+             imuData.angular_velocity.x(), // BnoAngularX
+             imuData.angular_velocity.y(), // BnoAngularY
+             imuData.angular_velocity.z(), // BnoAngularZ
+             imuData.sys_health, // BnoSysHealth
+             imuData.gyro_health, // BnoGyroHealth
+             imuData.accel_health); // BnoAccelHealth
+    
+    file.println(buf);
+    // prepend "d: " to the buffer to indicate that it's data
+    snprintf(buf, len, "d: %s", buf);
+    rf95.send((uint8_t*)buf, len);
     logTimer.start(); // reset the timer!
+
 }
 
 void setup()
@@ -253,6 +239,8 @@ void setup()
     baroTimer.start();
     bnoTimer.start();
     mpl.startOneShot(); // Start the sensor in one-shot mode.
+
+    rf95.send("ok: all sensors connected", 26);
 }
 
 void loop()
@@ -281,7 +269,6 @@ void loop()
         bno.getCalibration(&imuData.sys_health, &imuData.gyro_health, &imuData.accel_health, &mag);
         
     }
-
     
     writeDataPoint();
 }

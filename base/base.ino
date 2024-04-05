@@ -12,10 +12,18 @@ void setup()
 {
     Serial.begin(9600);
 
+    pinMode(0, OUTPUT);
+    pinMode(1, OUTPUT);
+
+    digitalWrite(0, HIGH);
+    digitalWrite(1, LOW);
+
     while (!Serial)
         delay(100);
 
     Serial.println("ok: serial connected");
+
+    digitalWrite(1, HIGH);
 
     if (!rf95.init())
     {
@@ -31,9 +39,13 @@ void setup()
             ;
     }
 
+    // leds on 0, 1
+
     rf95.setTxPower(23, false);
 
     Serial.println("ok: radio connected");
+    digitalWrite(0, LOW);
+    digitalWrite(1, LOW);
 }
 
 void loop()
@@ -47,5 +59,9 @@ void loop()
         Serial.println((char *)buf);
         Serial.print("rssi: ");
         Serial.println(rf95.lastRssi(), DEC);
+        // blink the led
+        digitalWrite(1, HIGH);
+    } else {
+        digitalWrite(1, LOW);
     }
 }
