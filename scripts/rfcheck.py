@@ -11,9 +11,7 @@ for file in files:
                 if start_quote == -1 and end_quote == -1:
                     continue
                 length = end_quote - start_quote
-                # print(f"{file}: {line[start_quote+1:end_quote]}")
-                # rf95.send("ok: all sensors connected", 23);
-                # modify the length of the message (23) to length
+                # print(line[start_quote+1:end_quote])
                 print(f"{file}:{line_num+1} = {length}")
 
 

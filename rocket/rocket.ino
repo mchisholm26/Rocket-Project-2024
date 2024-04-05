@@ -167,13 +167,13 @@ void setup()
   rf95.setTxPower(23, false);
 
   //send a test message over the radio
-  rf95.send("Hello, rocket here", 23);
+  rf95.send("msg: hello, world!", 19);
   //delay(10);  //give the receiver a bit to catch up - I'm not sure this is necessary I'm having trouble with the receiver buffer
   
   if (!kxAccel.begin(KX134_CS))
     {
         Serial.println("Could not communicate with the KX134! Going to just... stop.");
-        rf95.send("error: initializing KX134", 23);
+        rf95.send("error: initializing KX134", 26);
         digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;
@@ -182,7 +182,7 @@ void setup()
     if (!mpl.begin())
     {
         Serial.println("Could not communicate with the MPL3115A2! Going to just... stop.");
-        rf95.send("error: initializing MPL3115A2", 23);
+        rf95.send("error: initializing MPL3115A2", 30);
         digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;
@@ -191,7 +191,7 @@ void setup()
     if (!bno.begin())
     {
     	Serial.println("Could not communicate with the BNO055! Going to just... stop");
-      rf95.send("error: initializing BNO055", 26);
+      rf95.send("error: initializing BNO055", 27);
       digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
     	while (1)
     		;
@@ -200,7 +200,7 @@ void setup()
     if (!SD.begin(BUILTIN_SDCARD))
     {
         Serial.println("Card failed, or not present");
-        rf95.send("error: initializing SD card", 23);
+        rf95.send("error: initializing SD card", 28);
         digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;
@@ -208,7 +208,7 @@ void setup()
 
     // everything works, send it over serial and radio
     Serial.println("Everything initialized successfully!");
-    rf95.send("checks complete, ready to go!", 28);
+    rf95.send("msg: checks complete, ready to go!", 35);
     digitalWrite(led_red, 1);   // turn off red led to show that everything is working
 
     
