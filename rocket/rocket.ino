@@ -55,6 +55,7 @@ Timer logTimer;
 Timer accelTimer;
 Timer baroTimer;
 Timer bnoTimer;
+Timer xmitTimer;
 
 void writeHeaders()
 {
@@ -90,7 +91,7 @@ void writeDataPoint()
 
     memset(buf, 0, len); // clear the buffer
 
-    snprintf(buf, len, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+    snprintf(buf, len, "%d,%d,%d,%f,%f,%f,%d,%f,%f,%f,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d",
              elapsedTime, // TotalTime
              logTimer.read(), // DeltaTime
              accelTimer.read(), // AccelAge
@@ -116,11 +117,22 @@ void writeDataPoint()
              imuData.gyro_health, // BnoGyroHealth
              imuData.accel_health); // BnoAccelHealth
     
-    file.println(buf);
-    // prepend "d: " to the buffer to indicate that it's data
-    snprintf(buf, len, "d: %s", buf);
-    rf95.send((uint8_t*)buf, len);
+    file.print(buf);
+    file.print("\n");
+    
+    // transmit telemetry to ground station every second
+    if(xmitTimer.read()>=1000){
+      digitalWrite(led_red, 0);   // turn on the red led when we transmit data
+      // prepend "d: " to the buffer to indicate that it's data
+      char radiobuf[RH_RF95_MAX_MESSAGE_LEN];   // create a new buffer because using the same one results in two d: at the beginning of the buffer
+      snprintf(radiobuf, len, "d: %s", buf);
+      rf95.send((uint8_t*)radiobuf, len);
+      xmitTimer.start();
+      digitalWrite(led_red, 1);
+    }
+    
     logTimer.start(); // reset the timer!
+    file.close();
 
 }
 
@@ -202,7 +214,7 @@ void setup()
     if (!SD.begin(BUILTIN_SDCARD))
     {
         Serial.println("Card failed, or not present");
-        rf95.send("error: initializing SD card", 28);
+        rf95.send("Error: initializing SD card", 28);
         digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;
@@ -230,7 +242,7 @@ void setup()
     // kxAccel.setOutputDataRate(); // Default is 50Hz
     kxAccel.enableAccel();
 
-    mpl.setMode(MPL3115A2_BAROMETER);
+    mpl.setMode(MPL3115A2_ALTIMETER);
     mpl.setSeaPressure(1013.26); // calibration! unit should be hPa.
 
     bno.setExtCrystalUse(true);
@@ -240,6 +252,7 @@ void setup()
     accelTimer.start();
     baroTimer.start();
     bnoTimer.start();
+    xmitTimer.start();
     mpl.startOneShot(); // Start the sensor in one-shot mode.
 
     rf95.send("ok: all sensors connected", 26);
@@ -271,6 +284,6 @@ void loop()
         bno.getCalibration(&imuData.sys_health, &imuData.gyro_health, &imuData.accel_health, &mag);
         
     }
-    
+
     writeDataPoint();
 }

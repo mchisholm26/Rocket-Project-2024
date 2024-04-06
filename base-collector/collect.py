@@ -18,6 +18,7 @@ console = Console()
 #         msg = f"{randint(1, 9)}" + ", ".join([f"{randint(1, 9)}" for _ in range(8)])
 #         return msg.encode("utf-8")
 
+#arduino = Serial(port="COM7", baudrate=9600)       #windows
 arduino = Serial(port="/dev/cu.usbmodem151894701", baudrate=9600)
 
 def status_to_str(status):
@@ -64,7 +65,7 @@ class ConsoleUI:
         stats_table.add_column("Value")
         stats_table.add_row("Temperature", f"{self.stats['temperature']} °C")
         stats_table.add_row("Temperature (American)", f"{self.stats['temperature'] * 9/5 + 32} °F")
-        stats_table.add_row("Time Connected", f"{round(self.stats['time_connected'], 2)} s")
+        stats_table.add_row("Time Connected", f"{round(self.stats['time_connected']/1000, 2)} s")
         stats_table.add_row("Altitude", f"{self.stats['altitude']} m")
         stats_table.add_row("Time Since Last Data Update", f"{self.stats['time_since_last_data_update']} s")
         stats_table.add_row("RSSI", f"{self.stats['rssi']} dBm")
@@ -99,9 +100,9 @@ class ConsoleUI:
                 self.status["base"] = 1
             elif message.startswith("error"):
                 self.status["base"] = 2
-            elif message.startswith("message"):
+            elif message.startswith("m"):
                 _, type, contents = message.split(": ")
-                if type.startswith("d:"):
+                if type.startswith("d"):
                     self.__data_csv.write(contents + "\n")
                     data = contents.split(",")
                     self.stats["time_connected"] = float(data[0])
