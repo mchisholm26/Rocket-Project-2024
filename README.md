@@ -10,8 +10,8 @@ The purpose of this code is to control the rocket being launched by Engineering 
 * [Adafruit 9-DOF Absolute Orientation IMU Fusion Breakout - BNO055](https://www.adafruit.com/product/2472)
 * [Adafruit RFM95W LoRa Radio Transceiver Breakout - 868 or 915 MHz - RadioFruit](https://www.adafruit.com/product/3072)
 * [Flash Memory Datasheet](https://www.renesas.com/us/en/document/dst/at25sf081b-datasheet) [Example code for the flash](https://rheingoldheavy.com/at25sf081-tutorial-02-reading-memory-byte/)
-~~* Unnamed GPS Module~~
-* [GPS Module}(https://www.u-blox.com/en/product/neo-m9n-module)
+* ~~Unnamed GPS Module~~
+* [GPS Module)(https://www.u-blox.com/en/product/neo-m9n-module)
 ## Software (on Rocket)
 ~~* [CircutPython](https://circuitpython.org/board/teensy41/)~~
 * C++
