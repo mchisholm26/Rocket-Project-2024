@@ -18,8 +18,8 @@ console = Console()
 #         msg = f"{randint(1, 9)}" + ", ".join([f"{randint(1, 9)}" for _ in range(8)])
 #         return msg.encode("utf-8")
 
-arduino = Serial(port="COM7", baudrate=9600)       #windows
-#arduino = Serial(port="/dev/cu.usbmodem151894701", baudrate=9600)
+#arduino = Serial(port="COM7", baudrate=9600)       #windows
+arduino = Serial(port="/dev/cu.usbmodem151894701", baudrate=9600)
 
 def status_to_str(status):
     if status == 0:
