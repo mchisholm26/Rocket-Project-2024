@@ -15,4 +15,4 @@ also had 2 leds currently (0, 1)
 this should talk to the rocket!
 
 # Schematic
-![Schematic image](egr_rocket_test_board_v1.jpg)
+See 'Flight PCB Schematic.pdf'
