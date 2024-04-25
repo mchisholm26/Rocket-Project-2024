@@ -214,7 +214,7 @@ void setup()
     if (!SD.begin(BUILTIN_SDCARD))
     {
         Serial.println("Card failed, or not present");
-        rf95.send("Error: initializing SD card", 28);
+        rf95.send("error: initializing SD card", 28);
         digitalWrite(led_green, 1);   // turn off green led to show that there is a problem
         while (1)
             ;

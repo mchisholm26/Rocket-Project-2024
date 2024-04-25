@@ -28,6 +28,8 @@ def status_to_str(status):
         return "[bold green]Okay"
     elif status == 2:
         return "[red]Error"
+    elif status == 3:
+        return "[yellow]Warning"
     else:
         return "[yellow]Unknown"
 
@@ -41,7 +43,7 @@ class ConsoleUI:
         self.status = {
             "base": 0,
             "rocket": 0
-            # 0 = unknown (purple), 1 = okay (green), 2 = error (red)
+            # 0 = unknown (purple), 1 = okay (green), 2 = error (red), 3 = warning (yellow)
         }
         self.stats = {
             "time_connected": -1,
@@ -49,7 +51,11 @@ class ConsoleUI:
             "temperature": 0,
             "altitude": 0,
             "bno_sys_health": 0,
-            "rssi": 0
+            "rssi": 0,
+            "last_ping": 0,
+            "gps_lat": 0,
+            "gps_long": 0,
+            "gps_health": 0
         }
 
     def render_panels(self):
@@ -60,16 +66,25 @@ class ConsoleUI:
         status_table.add_row("Rocket", f"{status_to_str(self.status['rocket'])}")
         self.__status_panel = Panel(status_table, title="Status", border_style="green")
 
+        if round((time() - self.stats['last_ping']) * 1000, 2) > 10_000 and self.status["rocket"] == 1:
+            self.status["rocket"] = 3
+        elif self.status["rocket"] == 3 and round((time() - self.stats['last_ping']) * 1000, 2) < 10_000:
+            self.status["rocket"] = 1
+
         stats_table = Table(title="", show_header=False, show_edge=False, expand=True)
         stats_table.add_column("Stat", width=20)
         stats_table.add_column("Value")
         stats_table.add_row("Temperature", f"{self.stats['temperature']} °C")
         stats_table.add_row("Temperature (American)", f"{self.stats['temperature'] * 9/5 + 32} °F")
-        stats_table.add_row("Time Connected", f"{round(self.stats['time_connected']/1000, 2)} s")
+        stats_table.add_row("Time Connected", f"{round(self.stats['time_connected'] / 1000, 2)} s")
         stats_table.add_row("Altitude", f"{self.stats['altitude']} m")
-        stats_table.add_row("Time Since Last Data Update", f"{self.stats['time_since_last_data_update']} s")
+        stats_table.add_row("Time Since Last Ping", f"{round((time() - self.stats['last_ping']) * 1000, 2)} ms")
+        stats_table.add_row("Time Since Last Data Update", f"{self.stats['time_since_last_data_update']} ms")
         stats_table.add_row("RSSI", f"{self.stats['rssi']} dBm")
+        stats_table.add_row("GPS Latitude", f"{self.stats['gps_lat']}")
+        stats_table.add_row("GPS Longitude", f"{self.stats['gps_long']}")
         stats_table.add_row("BNO Sys Health", f"{self.stats['bno_sys_health']}")
+        stats.table.add_row("GPS Health", f"{self.stats['gps_health']}")
         stats_table.add_row("Messages", f"{self.messages}")
         self.__stats_panel = Panel(stats_table, title="Stats", border_style="blue")
         
@@ -102,7 +117,7 @@ class ConsoleUI:
                 self.status["base"] = 2
             elif message.startswith("m"):
                 _, type, contents = message.split(": ")
-                if type.startswith("d"):
+                if type.startswith("d"): # luna: revise this later~
                     self.__data_csv.write(contents + "\n")
                     data = contents.split(",")
                     self.stats["time_connected"] = float(data[0])
@@ -110,10 +125,15 @@ class ConsoleUI:
                     self.stats["temperature"] = float(data[9])
                     self.stats["altitude"] = float(data[7])
                     self.stats["bno_sys_health"] = float(data[21])
+                elif type.statswith("gps"):
+                    self.stats["gps_lat"] = float(data[0])
+                    self.stats["gps_long"] = float(data[1])
+                    self.stats["gps_health"] = float(data[2])
                 elif type.startswith("ok"):
                     self.status["rocket"] = 1
                 elif type.startswith("error"):
                     self.status["rocket"] = 2
+                self.stats["last_ping"] = time()
         except:
             pass
 
