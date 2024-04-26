@@ -1,7 +1,5 @@
 #include <SPI.h>
 
-const int builtin_led = 13;
-
 const int gps_select = 4;
 const int gps_reset = 5;
 const int gps_freq = 100000;
@@ -36,13 +34,6 @@ void setup() {
   Serial.begin(9600);
   SPI.begin();
   setup_gps();
-  
-  pinMode(builtin_led, OUTPUT);
-
-  while (!Serial) {
-    digitalWrite(builtin_led, HIGH);
-  }
-  digitalWrite(builtin_led, LOW);
 
   Serial.println("Hello");
 }
@@ -53,8 +44,4 @@ void loop() {
   Serial.println("Reading...");
   Serial.println(read_byte_from_gps());
   Serial.flush();
-  while (!Serial) {
-    digitalWrite(builtin_led, HIGH);
-  }
-  digitalWrite(builtin_led, LOW);
 }
