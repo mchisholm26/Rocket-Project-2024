@@ -1,10 +1,13 @@
-#include <SPI.h>
+//Interface description: https://content.u-blox.com/sites/default/files/u-blox-M9-SPG-4.04_InterfaceDescription_UBX-21022436.pdf#%5B%7B%22num%22%3A2477%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C59.527%2C599.697%2Cnull%5D
 
-const int builtin_led = 13;
+// Might take some configuration ahead of time
+// It looked like it was *once* reading partial NMEA sentences but not anymore.
+
+#include <SPI.h>
 
 const int gps_select = 4;
 const int gps_reset = 5;
-const int gps_freq = 100000;
+const int gps_freq = 1000000;
 const int gps_spi_mode = SPI_MODE0;
 const int gps_bit_order = MSBFIRST;
 
@@ -12,49 +15,34 @@ void setup_gps() {
   pinMode(gps_select, OUTPUT);
   pinMode(gps_reset, OUTPUT);
   digitalWrite(gps_select, HIGH);
-
-  digitalWrite(gps_reset, LOW);
-  delay(10);
-  digitalWrite(gps_reset, HIGH);
-}
-
-uint8_t read_byte_from_gps() {
-  Serial.println("Here");
-  SPI.beginTransaction(SPISettings(gps_freq, gps_bit_order, gps_spi_mode));
-  Serial.println("Here");
-  digitalWrite(gps_select, LOW);
-  Serial.println("Here");
-  uint8_t b = SPI.transfer(255);
-  Serial.println("Here");
   digitalWrite(gps_select, HIGH);
-  SPI.endTransaction();
-  return b;
+
+  // digitalWrite(gps_reset, LOW);
+  // delay(125);
+  // digitalWrite(gps_reset, HIGH);
+
+  delay(700);
 }
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   SPI.begin();
-  setup_gps();
-  
-  pinMode(builtin_led, OUTPUT);
 
-  while (!Serial) {
-    digitalWrite(builtin_led, HIGH);
+  while (!Serial)
+  {
+    delay(10);
   }
-  digitalWrite(builtin_led, LOW);
+  Serial.println("Starting...");
+  Serial8.begin(38400);
 
-  Serial.println("Hello");
+  //setup_gps();
+  //Serial.println("GPS setup.");
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  delay(100);
-  Serial.println("Reading...");
-  Serial.println(read_byte_from_gps());
-  Serial.flush();
-  while (!Serial) {
-    digitalWrite(builtin_led, HIGH);
+  if (Serial8.available()) {
+    Serial.printf("%c", Serial8.read());
   }
-  digitalWrite(builtin_led, LOW);
 }
