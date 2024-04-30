@@ -1,3 +1,4 @@
+from time import time
 from time import sleep
 from rich.console import Console
 from rich.live import Live
@@ -18,8 +19,8 @@ console = Console()
 #         msg = f"{randint(1, 9)}" + ", ".join([f"{randint(1, 9)}" for _ in range(8)])
 #         return msg.encode("utf-8")
 
-#arduino = Serial(port="COM7", baudrate=9600)       #windows
-arduino = Serial(port="/dev/cu.usbmodem151894701", baudrate=9600)
+arduino = Serial(port="COM7", baudrate=9600)       #windows
+#arduino = Serial(port="/dev/cu.usbmodem151894701", baudrate=9600)
 
 def status_to_str(status):
     if status == 0:
@@ -74,17 +75,17 @@ class ConsoleUI:
         stats_table = Table(title="", show_header=False, show_edge=False, expand=True)
         stats_table.add_column("Stat", width=20)
         stats_table.add_column("Value")
-        stats_table.add_row("Temperature", f"{self.stats['temperature']} °C")
-        stats_table.add_row("Temperature (American)", f"{self.stats['temperature'] * 9/5 + 32} °F")
-        stats_table.add_row("Time Connected", f"{round(self.stats['time_connected'] / 1000, 2)} s")
-        stats_table.add_row("Altitude", f"{self.stats['altitude']} m")
-        stats_table.add_row("Time Since Last Ping", f"{round((time() - self.stats['last_ping']) * 1000, 2)} ms")
+        stats_table.add_row("Temperature", f"{round(self.stats['temperature'],1)} °C")
+        stats_table.add_row("Temperature (American)", f"{round(self.stats['temperature'] * 9/5 + 32, 1)} °F")
+        stats_table.add_row("Time Connected", f"{round(self.stats['time_connected'] / 1000, 1)} s")
+        stats_table.add_row("Altitude", f"{round(self.stats['altitude'], 1)} m")
+        stats_table.add_row("Time Since Last Ping", f"{round((time() - self.stats['last_ping']) * 1000)} ms")
         stats_table.add_row("Time Since Last Data Update", f"{self.stats['time_since_last_data_update']} ms")
         stats_table.add_row("RSSI", f"{self.stats['rssi']} dBm")
         stats_table.add_row("GPS Latitude", f"{self.stats['gps_lat']}")
         stats_table.add_row("GPS Longitude", f"{self.stats['gps_long']}")
-        stats_table.add_row("BNO Sys Health", f"{self.stats['bno_sys_health']}")
-        stats.table.add_row("GPS Health", f"{self.stats['gps_health']}")
+        stats_table.add_row("BNO Sys Health", f"{round(self.stats['bno_sys_health'])}")
+        stats_table.add_row("GPS Health", f"{self.stats['gps_health']}")
         stats_table.add_row("Messages", f"{self.messages}")
         self.__stats_panel = Panel(stats_table, title="Stats", border_style="blue")
         
