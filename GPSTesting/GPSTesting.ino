@@ -7,7 +7,7 @@
 
 const int gps_select = 4;
 const int gps_reset = 5;
-const int gps_freq = 5500000;
+const int gps_freq = 1000000;
 const int gps_spi_mode = SPI_MODE0;
 const int gps_bit_order = MSBFIRST;
 
@@ -15,10 +15,11 @@ void setup_gps() {
   pinMode(gps_select, OUTPUT);
   pinMode(gps_reset, OUTPUT);
   digitalWrite(gps_select, HIGH);
+  digitalWrite(gps_select, HIGH);
 
-  digitalWrite(gps_reset, LOW);
-  delay(125);
-  digitalWrite(gps_reset, HIGH);
+  // digitalWrite(gps_reset, LOW);
+  // delay(125);
+  // digitalWrite(gps_reset, HIGH);
 
   delay(700);
 }
@@ -33,27 +34,15 @@ void setup() {
     delay(10);
   }
   Serial.println("Starting...");
+  Serial8.begin(38400);
 
-  setup_gps();
-  Serial.println("GPS setup.");
+  //setup_gps();
+  //Serial.println("GPS setup.");
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
-  SPI.beginTransaction(SPISettings(gps_freq, gps_bit_order, gps_spi_mode));
-  digitalWrite(gps_select, LOW);
-
-  delay(1);
-
-  uint8_t b = SPI.transfer(0xFF);
-
-  digitalWrite(gps_select, HIGH);
-  SPI.endTransaction();
-
-  if (b == 0xFF) {
-    return;
+  if (Serial8.available()) {
+    Serial.printf("%c", Serial8.read());
   }
-
-  Serial.printf("%c", b);
 }
