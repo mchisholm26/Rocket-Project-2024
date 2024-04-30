@@ -50,6 +50,7 @@ mplData baroData;
 bnoData imuData;
 
 File file;
+char data_file_name[32] = "";
 
 Timer logTimer;
 Timer accelTimer;
@@ -59,11 +60,30 @@ Timer xmitTimer;
 
 void writeHeaders()
 {
-    if (SD.exists("datalog.csv"))
-    {
-        SD.remove("datalog.csv"); // remove the file if it exists
+    File count_file;
+    int count = 0;
+
+    if (SD.exists("count.txt")) {
+      count_file = SD.open("count.txt", FILE_READ);
+
+      char count_text[16] = "";
+      count_file.readBytes(count_text, sizeof(count_text));
+      count = atoi(count_text);
+      count += 1;
+      count_file.close(); // Close the file once the count is obtained.
     }
-    file = SD.open("datalog.csv", FILE_WRITE);
+
+    char count_text[16] = "";
+    snprintf(count_text, sizeof(count_text), "%04d", count);
+
+    count_file = SD.open("count.txt", FILE_WRITE);
+    count_file.truncate(0); // Delete contents of file.
+    count_file.write(count_text, sizeof(count_text)); // Add count text back to file.
+    count_file.close(); // Finished using count file.
+
+    snprintf(data_file_name, sizeof(data_file_name), "datalog%s.csv", count_text);
+
+    file = SD.open(data_file_name, FILE_WRITE);
     file.println("TotalTime,DeltaTime,AccelAge,AccelX,AccelY,AccelZ,BaroAge,Altitude,Pressure,Temperature,BnoAge,BnoAccelX,BnoAccelY,BnoAccelZ,BnoOrientationW,BnoOrientationX,BnoOrientationY,BnoOrientationZ,BnoAngularX,BnoAngularY,BnoAngularZ,BnoSysHealth,BnoGyroHealth,BnoAccelHealth");
     file.close();
     // DeltaTime is the time between the last data point and the current one.
@@ -81,7 +101,7 @@ void writeHeaders()
 
 void writeDataPoint()
 {
-    file = SD.open("datalog.csv", FILE_WRITE);
+    file = SD.open(data_file_name, FILE_WRITE);
     // write the data to the buf, then send it over radio & write to SD
 
     elapsedTime += logTimer.read();
